@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { CopyButton } from './copy-button';
 import { ParticipantStatusTable } from './participant-status-table';
-import { Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, TriangleAlert } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useSearchParams } from 'next/navigation';
 
 interface AdminDashboardProps {
     adminId: string;
@@ -17,6 +19,8 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
     const [pairings, setPairings] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [showPairings, setShowPairings] = useState(false);
+    const searchParams = useSearchParams();
+    const isNew = searchParams.get('new') === 'true';
 
     const fetchData = async () => {
         try {
@@ -56,17 +60,18 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
     if (loading) return <div className="text-center py-20">Loading...</div>;
     if (!data) return <div className="text-center py-20">Event not found</div>;
 
-    const publicLink = `${window.location.origin}/event/${data.public_id || ''}`; // Wait, we don't have public_id in admin response yet?
-    // Ah, I missed returning public_id in GET /api/admin/[adminId].
-    // I should fix the API route or just assume we can't get it easily?
-    // The spec says "Shows success page with two links". 
-    // But the admin dashboard should also show the participant link to copy.
-    // I need to update GET /api/admin/[adminId] to return public_id.
-
-    // For now, let's assume I'll fix the API.
-
     return (
         <div className="space-y-8 pb-20">
+            {isNew && (
+                <Alert variant="default" className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900 text-yellow-800 dark:text-yellow-200">
+                    <TriangleAlert className="h-4 w-4" />
+                    <AlertTitle>Save this page!</AlertTitle>
+                    <AlertDescription>
+                        This is your private admin dashboard. <strong>You will not be able to recover it if you lose this link.</strong> Bookmark it now.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{data.name}</h1>

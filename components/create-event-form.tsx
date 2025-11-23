@@ -75,10 +75,6 @@ export function CreateEventForm() {
                 throw new Error(data.error || 'Failed to create event');
             }
 
-            // Success! Redirect to success page or show links
-            // For now, let's redirect to a success page or just the admin page?
-            // The spec says "Shows success page with two links".
-            // I'll redirect to the admin page, which should show the links.
             router.push(`/admin/${data.adminId}?new=true`);
 
         } catch (error: any) {
@@ -113,7 +109,7 @@ export function CreateEventForm() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="budget">Budget</Label>
-                            <Input id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="e.g. €20-30" />
+                            <Input id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="e.g. CHF 20-30" />
                         </div>
                     </div>
 

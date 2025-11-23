@@ -7,10 +7,9 @@ export default async function RevealPage({
     params: Promise<{ publicId: string; participantId: string }>
 }) {
     const { publicId, participantId } = await params;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     try {
-        const res = await fetch(`${appUrl}/api/events/${publicId}/participants/${participantId}/draw`, { cache: 'no-store' });
+        const res = await fetch(`/api/events/${publicId}/participants/${participantId}/draw`, { cache: 'no-store' });
 
         if (!res.ok) {
             if (res.status === 404) notFound();
@@ -20,7 +19,6 @@ export default async function RevealPage({
         const data = await res.json();
 
         if (!data.claimed) {
-            // Not claimed yet, redirect back to event page
             redirect(`/event/${publicId}`);
         }
 

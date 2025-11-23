@@ -28,13 +28,6 @@ export function ClaimConfirmModal({ isOpen, onClose, participant, publicId }: Cl
 
     const handleClaim = async () => {
         if (participant.claimed) {
-            // If already claimed, just go to reveal page (if we allowed re-viewing without auth, which spec says yes)
-            // "Can return anytime ... and click their name to see their draw again (no re-confirmation needed once claimed)"
-            // But wait, if it's claimed, how do we know it's THEM?
-            // The spec says "no re-confirmation needed once claimed".
-            // But usually we'd want to prevent others from seeing it.
-            // However, spec says "Simplicity over security".
-            // So we just let them see it.
             router.push(`/event/${publicId}/reveal/${participant.id}`);
             return;
         }
@@ -53,7 +46,6 @@ export function ClaimConfirmModal({ isOpen, onClose, participant, publicId }: Cl
                 throw new Error(data.error || 'Failed to claim');
             }
 
-            // Success
             router.push(`/event/${publicId}/reveal/${participant.id}`);
 
         } catch (error: any) {
