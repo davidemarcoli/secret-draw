@@ -85,7 +85,7 @@ The easiest way to organize your Secret Santa or Wichteln gift exchange. Free, o
   <img src="https://contrib.rocks/image?repo=davidemarcoli/secret-draw" />
 </a>
 
-### Core Team
+
 
 - **[Davide Marcoli](https://github.com/davidemarcoli)** - [@davidemarcoli](https://davidemarcoli.dev)
 - **[Stefan Laux](https://github.com/stefanlaux)** - [@stefanlaux](https://stefan-laux.dev)
