@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎁 Secret Draw
 
-## Getting Started
+> **Built with Vibe and Code** - AI-powered development
 
-First, run the development server:
+The easiest way to organize your Secret Santa or Wichteln gift exchange. Free, open-source, and privacy-focused.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://secret-draw.com)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🎯 **Simple & Fast** - Create events in seconds
+- 🔒 **Privacy First** - No registration or emails required
+- 🎨 **Beautiful UI** - Modern, responsive design with dark mode
+- 🔗 **Share via Link** - Just send one link to all participants
+- 🚫 **Exclusion Rules** - Prevent specific pairings (e.g., couples)
+- 📱 **Mobile Friendly** - Works perfectly on all devices
+- 🌍 **Multi-language** - Supports Secret Santa (EN) and Wichteln (DE)
+- 🔐 **Secure** - Firebase authentication for event creators
+- 📊 **Admin Dashboard** - Track who has claimed their spot
 
-## Learn More
+## 🚀 Quick Start
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/davidemarcoli/secret-draw.git
+   cd secret-draw
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Set up Firebase**
+   - Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+   - Enable Firestore Database
+   - Enable Authentication (Google & Email/Password)
+   - Copy your Firebase config to `.env.local`:
+   
+   ```env
+   NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-project.appspot.com"
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
+   NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
+   NEXT_PUBLIC_FIREBASE_MEASUREMENT="G-..."
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
 
-## Deploy on Vercel
+4. **Update Firestore Rules**
+   - Copy the rules from `firestore.rules`
+   - Paste them in Firebase Console → Firestore Database → Rules
+   - Click "Publish"
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+6. **Open [http://localhost:3000](http://localhost:3000)**
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [Firebase Firestore](https://firebase.google.com/docs/firestore)
+- **Authentication**: [Firebase Auth](https://firebase.google.com/docs/auth)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Deployment**: [Vercel](https://vercel.com)
+
+## 📖 How It Works
+
+1. **Create Event**: Organizer creates an event with participant names
+2. **Set Exclusions**: Optionally prevent specific pairings
+3. **Share Link**: Send the public link to all participants
+4. **Claim Names**: Each participant claims their name
+5. **Reveal Draw**: See who they're buying a gift for! 🎉
+
+## 🤝 Contributors
+
+<a href="https://github.com/davidemarcoli/secret-draw/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=davidemarcoli/secret-draw" />
+</a>
+
+### Core Team
+
+- **[Davide Marcoli](https://github.com/davidemarcoli)** - [@davidemarcoli](https://davidemarcoli.dev)
+- **[Stefan Laux](https://github.com/stefanlaux)** - [@stefanlaux](https://stefan-laux.dev)
+
+## 🙏 Acknowledgments
+
+- Built with ❤️ using [Vibecode](https://vibecode.app)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Icons from [Lucide](https://lucide.dev/)
+
+## 🐛 Found a Bug?
+
+If you find a bug or have a feature request, please [open an issue](https://github.com/davidemarcoli/secret-draw/issues).
+
+## ⭐ Show Your Support
+
+Give a ⭐️ if this project helped you organize your Secret Santa!
+
+---
+
+**Made with [Vibecode](https://vibecode.app) by [Davide Marcoli](https://davidemarcoli.dev) and [Stefan Laux](https://stefan-laux.dev)**
