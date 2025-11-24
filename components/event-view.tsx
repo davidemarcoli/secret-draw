@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ClaimConfirmModal } from './claim-confirm-modal';
-import { Calendar, MapPin, Wallet, Gift } from 'lucide-react';
+import { Calendar, MapPin, Wallet, Gift, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Participant {
     id: string;
@@ -13,26 +14,68 @@ interface Participant {
     claimed: boolean;
 }
 
-interface EventViewProps {
-    publicId: string;
-    event: {
-        name: string;
-        description: string | null;
-        date: string | null;
-        place: string | null;
-        budget: string | null;
-        participants: Participant[];
-    };
+interface EventData {
+    name: string;
+    description: string | null;
+    date: string | null;
+    place: string | null;
+    budget: string | null;
+    participants: Participant[];
 }
 
-export function EventView({ publicId, event }: EventViewProps) {
+interface EventViewProps {
+    publicId: string;
+}
+
+export function EventView({ publicId }: EventViewProps) {
+    const [event, setEvent] = useState<EventData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
     const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const res = await fetch(`/api/events/${publicId}`);
+                if (!res.ok) {
+                    throw new Error('Event not found');
+                }
+                const data = await res.json();
+                setEvent(data);
+            } catch (err) {
+                console.error('Error fetching event:', err);
+                setError(true);
+                toast.error('Failed to load event');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvent();
+    }, [publicId]);
 
     const handleParticipantClick = (participant: Participant) => {
         setSelectedParticipant(participant);
         setIsModalOpen(true);
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
+    if (error || !event) {
+        return (
+            <div className="p-20 text-center">
+                <h1 className="text-2xl font-bold mb-4">Event not found</h1>
+                <p className="text-muted-foreground">This event may have been deleted or the link is incorrect.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 max-w-md mx-auto pb-20">

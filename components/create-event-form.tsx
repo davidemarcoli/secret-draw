@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,13 +11,20 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ParticipantListManager } from './participant-list-manager';
 import { ExclusionManager } from './exclusion-manager';
+import { LoginDialog } from './login-dialog';
+import { auth, db } from '@/lib/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { collection, doc, writeBatch } from 'firebase/firestore';
+import { generatePairings } from '@/lib/draw-algorithm';
+import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
-interface Exclusion {
+interface LocalExclusion {
     from: string;
     to: string;
 }
+
 
 export function CreateEventForm() {
     const router = useRouter();
@@ -30,9 +37,134 @@ export function CreateEventForm() {
     const [place, setPlace] = useState('');
     const [budget, setBudget] = useState('');
     const [participants, setParticipants] = useState<string[]>([]);
-    const [exclusions, setExclusions] = useState<Exclusion[]>([]);
+    const [exclusions, setExclusions] = useState<LocalExclusion[]>([]);
     const [organizerParticipating, setOrganizerParticipating] = useState(true);
     const [organizerName, setOrganizerName] = useState('');
+
+    // Auth State
+    const [user, setUser] = useState<User | null>(null);
+    const [showLogin, setShowLogin] = useState(false);
+
+    // Listen to auth state
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const createEvent = async () => {
+        if (!user) return;
+        setLoading(true);
+
+        try {
+            // Client-side validation
+            const tempParticipants = participants.map((p, i) => ({ id: i.toString(), name: p }));
+            const tempExclusions = exclusions.map(ex => ({
+                participant_a_name: ex.from,
+                participant_b_name: ex.to,
+                direction: 'a_to_b'
+            }));
+
+            const pairingResult = generatePairings(tempParticipants, tempExclusions as any);
+            if (!pairingResult) {
+                throw new Error('No valid pairing possible with these exclusions');
+            }
+
+            // Prepare Batch
+            const batch = writeBatch(db);
+            const eventId = doc(collection(db, 'events')).id;
+            const publicId = uuidv4();
+            const adminId = uuidv4();
+            const eventRef = doc(db, 'events', eventId);
+
+            // Create Event
+            batch.set(eventRef, {
+                id: eventId,
+                public_id: publicId,
+                admin_id: adminId,
+                name,
+                description: description || null,
+                date: date || null,
+                place: place || null,
+                budget: budget || null,
+                organizer_participating: organizerParticipating,
+                organizer_participant_id: null,
+                created_by: user.uid, // Track who created it
+                created_at: new Date().toISOString(),
+                status: 'active'
+            });
+
+            // Create Participants
+            const participantRefs: { [name: string]: any } = {};
+            const participantsData: any[] = [];
+
+            participants.forEach((pName) => {
+                const pRef = doc(collection(eventRef, 'participants'));
+                participantRefs[pName] = pRef;
+                const pData = {
+                    id: pRef.id,
+                    event_id: eventId,
+                    name: pName,
+                    claimed: false,
+                    claimed_at: null,
+                    draws_participant_id: null,
+                    is_active: true,
+                    created_at: new Date().toISOString()
+                };
+                participantsData.push(pData);
+                batch.set(pRef, pData);
+            });
+
+            // Handle Organizer
+            if (organizerParticipating && organizerName) {
+                const organizerRef = participantRefs[organizerName];
+                if (organizerRef) {
+                    batch.update(eventRef, { organizer_participant_id: organizerRef.id });
+                }
+            }
+
+            // Exclusions
+            exclusions.forEach((ex) => {
+                const exRef = doc(collection(eventRef, 'exclusions'));
+                batch.set(exRef, {
+                    id: exRef.id,
+                    event_id: eventId,
+                    participant_a_name: ex.from || null,
+                    participant_b_name: ex.to || null,
+                    direction: 'a_to_b'
+                });
+            });
+
+            // Generate Pairings (Real IDs)
+            const realExclusions = exclusions.map(ex => ({
+                participant_a_name: ex.from,
+                participant_b_name: ex.to,
+                direction: 'a_to_b'
+            }));
+            const createdParticipants = participantsData.map(p => ({ id: p.id, name: p.name }));
+            const pairings = generatePairings(createdParticipants, realExclusions as any);
+
+            if (!pairings) throw new Error('Failed to generate pairings');
+
+            for (const [giverId, receiverId] of pairings.entries()) {
+                const giverData = participantsData.find(p => p.id === giverId);
+                if (giverData) {
+                    const giverRef = participantRefs[giverData.name];
+                    batch.update(giverRef, { draws_participant_id: receiverId });
+                }
+            }
+
+            await batch.commit();
+            router.push(`/admin/${adminId}?new=true`);
+
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || 'Failed to create event');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,38 +182,12 @@ export function CreateEventForm() {
             return;
         }
 
-        setLoading(true);
-
-        try {
-            const res = await fetch('/api/events', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    description,
-                    date,
-                    place,
-                    budget,
-                    participants,
-                    exclusions,
-                    organizerParticipating,
-                    organizerName: organizerParticipating ? organizerName : null
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || 'Failed to create event');
-            }
-
-            router.push(`/admin/${data.adminId}?new=true`);
-
-        } catch (error: any) {
-            toast.error(error.message);
-        } finally {
-            setLoading(false);
+        if (!user) {
+            setShowLogin(true);
+            return;
         }
+
+        await createEvent();
     };
 
     return (
@@ -177,8 +283,8 @@ export function CreateEventForm() {
                 <CardContent>
                     <ExclusionManager
                         participants={participants}
-                        exclusions={exclusions}
-                        onChange={setExclusions}
+                        exclusions={exclusions as any}
+                        onChange={setExclusions as any}
                     />
                 </CardContent>
             </Card>
@@ -186,9 +292,15 @@ export function CreateEventForm() {
             <div className="flex justify-end">
                 <Button size="lg" type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Event
+                    {user ? 'Create Event' : 'Login & Create Event'}
                 </Button>
             </div>
+
+            <LoginDialog
+                open={showLogin}
+                onOpenChange={setShowLogin}
+                onSuccess={createEvent}
+            />
         </form>
     );
 }

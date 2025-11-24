@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { generatePairings } from '@/lib/draw-algorithm';
-import { Exclusion } from '@/lib/types';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 export async function POST(
     req: NextRequest,
@@ -12,79 +11,58 @@ export async function POST(
 
     try {
         // 1. Get Event
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('public_id', publicId)
-            .single();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('public_id', '==', publicId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !event) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        // 2. Get Participant
-        const { data: participant, error: partError } = await supabase
-            .from('participants')
-            .select('*')
-            .eq('id', participantId)
-            .eq('event_id', event.id)
-            .single();
+        const eventDoc = eventsSnapshot.docs[0];
 
-        if (partError || !participant) {
+        // 2. Get Participant
+        const participantRef = doc(eventDoc.ref, 'participants', participantId);
+        const participantDoc = await getDoc(participantRef);
+
+        if (!participantDoc.exists()) {
             return NextResponse.json({ error: 'Participant not found' }, { status: 404 });
         }
 
-        if (participant.claimed) {
+        const participant = participantDoc.data();
+
+        if (participant?.claimed) {
             return NextResponse.json({ error: 'Already claimed' }, { status: 400 });
         }
 
-        // 3. Check if draws are already assigned (lazy generation vs pre-generation)
-        // The spec says "Pairings are pre-calculated when the event is created".
-        // Wait, the spec says "System validates and generates pairings using algorithm" at creation.
-        // But it doesn't explicitly say it SAVES them then.
-        // However, "When participants 'claim' their name, they are revealing their pre-assigned match".
-        // So we should have saved them.
-        // BUT the database schema doesn't have a separate "pairings" table.
-        // It has `draws_participant_id` on the `participants` table.
-        // So we should have assigned `draws_participant_id` during creation!
-
-        // Let's check my creation logic.
-        // I missed assigning `draws_participant_id` in `POST /api/events`.
-        // I need to fix `POST /api/events` to actually save the pairings.
-
-        // For now, let's assume they are assigned.
-
         // 4. Mark as claimed
-        const { error: updateError } = await supabase
-            .from('participants')
-            .update({
-                claimed: true,
-                claimed_at: new Date().toISOString()
-            })
-            .eq('id', participantId);
-
-        if (updateError) throw updateError;
+        await updateDoc(participantRef, {
+            claimed: true,
+            claimed_at: new Date().toISOString()
+        });
 
         // 5. Return the draw
-        // We need to fetch the drawn participant details
-        if (!participant.draws_participant_id) {
-            // This is a critical error if pairings weren't generated
+        if (!participant?.draws_participant_id) {
             return NextResponse.json({ error: 'Draw not assigned' }, { status: 500 });
         }
 
-        const { data: drawnParticipant, error: drawError } = await supabase
-            .from('participants')
-            .select('id, name')
-            .eq('id', participant.draws_participant_id)
-            .single();
+        const drawnParticipantRef = doc(eventDoc.ref, 'participants', participant.draws_participant_id);
+        const drawnParticipantDoc = await getDoc(drawnParticipantRef);
 
-        if (drawError) throw drawError;
+        if (!drawnParticipantDoc.exists()) {
+            return NextResponse.json({ error: 'Drawn participant not found' }, { status: 500 });
+        }
+
+        const drawnParticipant = drawnParticipantDoc.data();
 
         return NextResponse.json({
             success: true,
             draws: {
-                id: drawnParticipant.id,
-                name: drawnParticipant.name
+                id: drawnParticipantDoc.id,
+                name: drawnParticipant?.name
             }
         });
 

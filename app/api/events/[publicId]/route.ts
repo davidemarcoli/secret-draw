@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 
 export async function GET(
     req: NextRequest,
@@ -8,25 +9,31 @@ export async function GET(
     const { publicId } = await params;
 
     try {
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('public_id', publicId)
-            .single();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('public_id', '==', publicId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !event) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        const { data: participants, error: partError } = await supabase
-            .from('participants')
-            .select('id, name, claimed')
-            .eq('event_id', event.id)
-            .eq('is_active', true);
+        const eventDoc = eventsSnapshot.docs[0];
+        const event = eventDoc.data();
 
-        if (partError) {
-            return NextResponse.json({ error: 'Failed to fetch participants' }, { status: 500 });
-        }
+        const participantsQuery = query(
+            collection(eventDoc.ref, 'participants'),
+            where('is_active', '==', true)
+        );
+        const participantsSnapshot = await getDocs(participantsQuery);
+
+        const participants = participantsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name,
+            claimed: doc.data().claimed
+        }));
 
         return NextResponse.json({
             name: event.name,

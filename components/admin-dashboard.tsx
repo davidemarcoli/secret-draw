@@ -62,16 +62,6 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
 
     return (
         <div className="space-y-8 pb-20">
-            {isNew && (
-                <Alert variant="default" className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900 text-yellow-800 dark:text-yellow-200">
-                    <TriangleAlert className="h-4 w-4" />
-                    <AlertTitle>Save this page!</AlertTitle>
-                    <AlertDescription>
-                        This is your private admin dashboard. <strong>You will not be able to recover it if you lose this link.</strong> Bookmark it now.
-                    </AlertDescription>
-                </Alert>
-            )}
-
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{data.name}</h1>

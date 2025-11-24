@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit, doc, getDoc } from 'firebase/firestore';
 
 export async function GET(
     req: NextRequest,
@@ -8,45 +9,47 @@ export async function GET(
     const { publicId, participantId } = await params;
 
     try {
-        // Verify event exists (optional but good for security)
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('id')
-            .eq('public_id', publicId)
-            .single();
+        // Verify event exists
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('public_id', '==', publicId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !event) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        const { data: participant, error: partError } = await supabase
-            .from('participants')
-            .select('claimed, draws_participant_id')
-            .eq('id', participantId)
-            .eq('event_id', event.id)
-            .single();
+        const eventDoc = eventsSnapshot.docs[0];
 
-        if (partError || !participant) {
+        const participantRef = doc(eventDoc.ref, 'participants', participantId);
+        const participantDoc = await getDoc(participantRef);
+
+        if (!participantDoc.exists()) {
             return NextResponse.json({ error: 'Participant not found' }, { status: 404 });
         }
 
-        if (!participant.claimed) {
+        const participant = participantDoc.data();
+
+        if (!participant?.claimed) {
             return NextResponse.json({ claimed: false }, { status: 200 });
         }
 
-        const { data: drawnParticipant, error: drawError } = await supabase
-            .from('participants')
-            .select('id, name')
-            .eq('id', participant.draws_participant_id)
-            .single();
+        const drawnParticipantRef = doc(eventDoc.ref, 'participants', participant.draws_participant_id);
+        const drawnParticipantDoc = await getDoc(drawnParticipantRef);
 
-        if (drawError) throw drawError;
+        if (!drawnParticipantDoc.exists()) {
+            return NextResponse.json({ error: 'Drawn participant not found' }, { status: 500 });
+        }
+
+        const drawnParticipant = drawnParticipantDoc.data();
 
         return NextResponse.json({
             claimed: true,
             draws: {
-                id: drawnParticipant.id,
-                name: drawnParticipant.name
+                id: drawnParticipantDoc.id,
+                name: drawnParticipant?.name
             }
         });
 

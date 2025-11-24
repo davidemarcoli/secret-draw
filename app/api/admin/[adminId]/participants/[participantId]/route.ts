@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 export async function PATCH(
     req: NextRequest,
@@ -10,26 +11,29 @@ export async function PATCH(
 
     try {
         // Verify admin access
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('id')
-            .eq('admin_id', adminId)
-            .single();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('admin_id', '==', adminId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !event) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        // Update participant
-        const { error: updateError } = await supabase
-            .from('participants')
-            .update({ is_active: isActive })
-            .eq('id', participantId)
-            .eq('event_id', event.id);
+        const eventDoc = eventsSnapshot.docs[0];
 
-        if (updateError) {
-            return NextResponse.json({ error: 'Failed to update participant' }, { status: 500 });
+        // Update participant
+        const participantRef = doc(eventDoc.ref, 'participants', participantId);
+
+        // Check if exists first
+        const pDoc = await getDoc(participantRef);
+        if (!pDoc.exists()) {
+            return NextResponse.json({ error: 'Participant not found' }, { status: 404 });
         }
+
+        await updateDoc(participantRef, { is_active: isActive });
 
         return NextResponse.json({ success: true });
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 
 export async function GET(
     req: NextRequest,
@@ -8,15 +9,19 @@ export async function GET(
     const { adminId } = await params;
 
     try {
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('admin_id', adminId)
-            .single();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('admin_id', '==', adminId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !event) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
+
+        const eventDoc = eventsSnapshot.docs[0];
+        const event = eventDoc.data();
 
         if (event.organizer_participating) {
             return NextResponse.json({
@@ -25,14 +30,15 @@ export async function GET(
             }, { status: 403 });
         }
 
-        const { data: participants, error: partError } = await supabase
-            .from('participants')
-            .select('id, name, draws_participant_id')
-            .eq('event_id', event.id);
-
-        if (partError) {
-            return NextResponse.json({ error: 'Failed to fetch participants' }, { status: 500 });
-        }
+        const participantsSnapshot = await getDocs(collection(eventDoc.ref, 'participants'));
+        const participants = participantsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: data.name,
+                draws_participant_id: data.draws_participant_id
+            };
+        });
 
         // Map IDs to names for better readability
         const nameMap = new Map(participants.map(p => [p.id, p.name]));

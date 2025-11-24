@@ -13,63 +13,53 @@ Secret Draw is a web application for organizing Secret Santa-style gift exchange
 | Layer | Technology |
 |-------|------------|
 | Framework | Next.js 14+ (App Router) |
-| Database | Supabase (PostgreSQL) |
+| Database | Firebase (Firestore) |
 | Styling | Tailwind CSS + shadcn/ui |
-| Deployment | Vercel (app) + Supabase (database) |
+| Deployment | Vercel (app) + Firebase (database) |
 | Language | TypeScript |
 
 ---
 
-## Database Schema
-
-### Tables
-
-#### `events`
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID (PK) | Primary key |
-| `public_id` | UUID | Participant-facing link ID |
-| `admin_id` | UUID | Admin-facing link ID |
-| `name` | VARCHAR(255) | Event name |
-| `description` | TEXT | Event description (optional) |
-| `date` | DATE | Event date (optional) |
-| `place` | VARCHAR(255) | Event location (optional) |
-| `budget` | VARCHAR(100) | Budget suggestion (optional, e.g., "€20-30") |
-| `organizer_participating` | BOOLEAN | Whether organizer is also a participant |
-| `organizer_participant_id` | UUID (FK) | References participant if organizer is participating |
-| `created_at` | TIMESTAMP | Creation timestamp |
-| `status` | ENUM | 'active', 'completed' |
-
-#### `participants`
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID (PK) | Primary key |
-| `event_id` | UUID (FK) | References events.id |
-| `name` | VARCHAR(255) | Participant display name |
-| `claimed` | BOOLEAN | Whether participant has claimed their spot |
-| `claimed_at` | TIMESTAMP | When they claimed (nullable) |
-| `draws_participant_id` | UUID (FK) | Who this participant draws (references participants.id) |
-| `is_active` | BOOLEAN | Whether participant is still active (default: true) |
-| `created_at` | TIMESTAMP | Creation timestamp |
-
-#### `exclusions`
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID (PK) | Primary key |
-| `event_id` | UUID (FK) | References events.id |
-| `participant_a_name` | VARCHAR(255) | First person in exclusion pair |
-| `participant_b_name` | VARCHAR(255) | Second person in exclusion pair |
-| `direction` | ENUM | 'a_to_b' (A cannot draw B) or 'both' |
-
-*Note: Exclusions use names rather than participant IDs so they can be set before participants are finalized and imported across events.*
-
-#### `exclusion_imports`
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID (PK) | Primary key |
-| `target_event_id` | UUID (FK) | Event receiving exclusions |
-| `source_event_id` | UUID (FK) | Event providing exclusions |
-| `imported_at` | TIMESTAMP | When import occurred |
+## Database Schema (Firestore)
+ 
+### Collections
+ 
+#### `events` (Collection)
+Document ID: Auto-generated
+Fields:
+- `id`: string
+- `public_id`: string (UUID)
+- `admin_id`: string (UUID)
+- `name`: string
+- `description`: string
+- `date`: string
+- `place`: string
+- `budget`: string
+- `organizer_participating`: boolean
+- `organizer_participant_id`: string (ID of participant)
+- `created_at`: string (ISO)
+- `status`: 'active' | 'completed'
+ 
+#### `events/{eventId}/participants` (Subcollection)
+Document ID: Auto-generated
+Fields:
+- `id`: string
+- `event_id`: string
+- `name`: string
+- `claimed`: boolean
+- `claimed_at`: string (ISO)
+- `draws_participant_id`: string (ID of participant)
+- `is_active`: boolean
+- `created_at`: string (ISO)
+ 
+#### `events/{eventId}/exclusions` (Subcollection)
+Document ID: Auto-generated
+Fields:
+- `id`: string
+- `event_id`: string
+- `participant_a_name`: string
+- `participant_b_name`: string
+- `direction`: 'a_to_b' | 'both'
 
 ---
 
@@ -536,7 +526,7 @@ secret-draw/
 │   ├── participant-status-table.tsx
 │   └── copy-button.tsx
 ├── lib/
-│   ├── supabase.ts                 # Supabase client
+│   ├── firebase.ts                 # Firebase Admin client
 │   ├── draw-algorithm.ts           # Pairing algorithm
 │   ├── utils.ts                    # Utility functions
 │   └── types.ts                    # TypeScript types
@@ -551,9 +541,13 @@ secret-draw/
 ## Environment Variables
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+FIREBASE_API_KEY=""
+FIREBASE_AUTH_DOMAIN=""
+FIREBASE_PROJECT_ID=""
+FIREBASE_STORAGE_BUCKET=""
+FIREBASE_MESSAGING_SENDER_ID=""
+FIREBASE_APP_ID=""
+FIREBASE_MEASUREMENT_ID=""
 NEXT_PUBLIC_APP_URL=https://secret-draw.com
 ```
 
@@ -561,8 +555,8 @@ NEXT_PUBLIC_APP_URL=https://secret-draw.com
 
 ## Getting Started (For Agent)
 
-1. Set up Supabase project and create tables per schema above
-2. Install dependencies: `bun install @supabase/supabase-js`
+1. Set up Firebase project and create Firestore database
+2. Install dependencies: `npm install firebase-admin firebase uuid`
 3. Add shadcn/ui: `bunx shadcn-ui@latest init`
 4. Add required shadcn components: `bunx shadcn-ui@latest add button input card dialog badge table toast`
 5. Implement draw algorithm in `lib/draw-algorithm.ts`

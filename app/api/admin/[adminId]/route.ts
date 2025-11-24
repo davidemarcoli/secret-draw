@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 
 export async function GET(
     req: NextRequest,
@@ -8,25 +9,36 @@ export async function GET(
     const { adminId } = await params;
 
     try {
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('admin_id', adminId)
-            .single();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('admin_id', '==', adminId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !event) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        const { data: participants, error: partError } = await supabase
-            .from('participants')
-            .select('id, name, claimed, claimed_at, is_active')
-            .eq('event_id', event.id)
-            .order('name');
+        const eventDoc = eventsSnapshot.docs[0];
+        const event = eventDoc.data();
 
-        if (partError) {
-            return NextResponse.json({ error: 'Failed to fetch participants' }, { status: 500 });
-        }
+        const participantsQuery = query(
+            collection(eventDoc.ref, 'participants'),
+            orderBy('name')
+        );
+        const participantsSnapshot = await getDocs(participantsQuery);
+
+        const participants = participantsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: data.name,
+                claimed: data.claimed,
+                claimedAt: data.claimed_at,
+                isActive: data.is_active
+            };
+        });
 
         return NextResponse.json({
             public_id: event.public_id,
@@ -36,13 +48,7 @@ export async function GET(
             place: event.place,
             budget: event.budget,
             organizerParticipating: event.organizer_participating,
-            participants: participants.map(p => ({
-                id: p.id,
-                name: p.name,
-                claimed: p.claimed,
-                claimedAt: p.claimed_at,
-                isActive: p.is_active
-            })),
+            participants,
             canViewPairings: !event.organizer_participating
         });
 

@@ -22,6 +22,9 @@ export default function Home() {
         <Button asChild size="lg" className="text-lg px-8 py-6 h-auto">
           <Link href="/create">Create Event</Link>
         </Button>
+        <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 h-auto">
+          <Link href="/events">View Existing Events</Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-12 max-w-4xl text-left">

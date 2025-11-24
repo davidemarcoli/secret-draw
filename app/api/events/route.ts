@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
 import { generatePairings } from '@/lib/draw-algorithm';
 import { Exclusion } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
+import { collection, doc, writeBatch, setDoc, updateDoc } from 'firebase/firestore';
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -48,65 +51,77 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Failed to validate pairings' }, { status: 400 });
         }
 
-        // 1. Create Event
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .insert({
-                name,
-                description,
-                date,
-                place,
-                budget,
-                organizer_participating: organizerParticipating
-            })
-            .select()
-            .single();
+        // 1. Prepare Batch
+        const batch = writeBatch(db);
 
-        if (eventError) throw eventError;
+        // Generate IDs
+        const eventId = doc(collection(db, 'events')).id;
+        const publicId = uuidv4();
+        const adminId = uuidv4();
+        const eventRef = doc(db, 'events', eventId);
+
+        // Create Event
+        batch.set(eventRef, {
+            id: eventId,
+            public_id: publicId,
+            admin_id: adminId,
+            name,
+            description: description || null,
+            date: date || null,
+            place: place || null,
+            budget: budget || null,
+            organizer_participating: organizerParticipating || false,
+            organizer_participant_id: null, // Will update if needed
+            created_at: new Date().toISOString(),
+            status: 'active'
+        });
 
         // 2. Create Participants
-        const participantInserts = participants.map((pName: string) => ({
-            event_id: event.id,
-            name: pName,
-            claimed: false
-        }));
+        const participantRefs: { [name: string]: any } = {};
+        const participantsData: any[] = [];
 
-        const { data: createdParticipants, error: partError } = await supabase
-            .from('participants')
-            .insert(participantInserts)
-            .select();
+        participants.forEach((pName: string) => {
+            const pRef = doc(collection(eventRef, 'participants'));
+            participantRefs[pName] = pRef;
 
-        if (partError) throw partError;
+            const pData = {
+                id: pRef.id,
+                event_id: eventId,
+                name: pName,
+                claimed: false,
+                claimed_at: null,
+                draws_participant_id: null,
+                is_active: true,
+                created_at: new Date().toISOString()
+            };
+
+            participantsData.push(pData);
+            batch.set(pRef, pData);
+        });
 
         // 3. Handle Organizer Participation
         if (organizerParticipating && organizerName) {
-            const organizer = createdParticipants.find(p => p.name === organizerName);
-            if (organizer) {
-                await supabase
-                    .from('events')
-                    .update({ organizer_participant_id: organizer.id })
-                    .eq('id', event.id);
+            const organizerRef = participantRefs[organizerName];
+            if (organizerRef) {
+                batch.update(eventRef, { organizer_participant_id: organizerRef.id });
             }
         }
 
         // 4. Create Exclusions
         if (exclusions && exclusions.length > 0) {
-            const exclusionInserts = exclusions.map((ex: any) => ({
-                event_id: event.id,
-                participant_a_name: ex.from,
-                participant_b_name: ex.to,
-                direction: 'a_to_b'
-            }));
-
-            const { error: exError } = await supabase
-                .from('exclusions')
-                .insert(exclusionInserts);
-
-            if (exError) throw exError;
+            exclusions.forEach((ex: any) => {
+                const exRef = doc(collection(eventRef, 'exclusions'));
+                batch.set(exRef, {
+                    id: exRef.id,
+                    event_id: eventId,
+                    participant_a_name: ex.from || null,
+                    participant_b_name: ex.to || null,
+                    direction: 'a_to_b'
+                });
+            });
         }
 
         // 5. Generate and Save Pairings
-        // We need to use the real participants now
         // Map exclusions to the format expected by generatePairings
         const realExclusions: any[] = exclusions.map((ex: any) => ({
             participant_a_name: ex.from,
@@ -114,28 +129,35 @@ export async function POST(req: NextRequest) {
             direction: 'a_to_b'
         }));
 
+        // We need the participant objects with IDs for the algorithm
+        const createdParticipants = participantsData.map(p => ({
+            id: p.id,
+            name: p.name
+        }));
+
         const pairings = generatePairings(createdParticipants, realExclusions);
 
         if (!pairings) {
-            // This shouldn't happen if validation passed, unless race condition or non-deterministic shuffle led to failure (unlikely for valid inputs)
-            // But we should handle it.
             throw new Error('Failed to generate pairings after creation');
         }
 
         // Update participants with their draws
         for (const [giverId, receiverId] of pairings.entries()) {
-            const { error: updateError } = await supabase
-                .from('participants')
-                .update({ draws_participant_id: receiverId })
-                .eq('id', giverId);
-
-            if (updateError) throw updateError;
+            // Find the ref for the giver
+            const giverData = participantsData.find(p => p.id === giverId);
+            if (giverData) {
+                const giverRef = participantRefs[giverData.name];
+                batch.update(giverRef, { draws_participant_id: receiverId });
+            }
         }
+
+        // Commit Batch
+        await batch.commit();
 
         return NextResponse.json({
             success: true,
-            publicId: event.public_id,
-            adminId: event.admin_id
+            publicId: publicId,
+            adminId: adminId
         });
 
     } catch (error) {

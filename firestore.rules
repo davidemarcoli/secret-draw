@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Events collection
+    match /events/{eventId} {
+      // Allow authenticated users to create events
+      allow create: if request.auth != null;
+      
+      // Allow anyone to read events (needed for public participant links and admin dashboard)
+      // This also allows authenticated users to query their own events
+      allow read: if true;
+      
+      // Allow update only by the creator
+      allow update: if request.auth != null && 
+                      request.auth.uid == resource.data.created_by;
+      
+      // Participants subcollection
+      match /participants/{participantId} {
+        // Anyone can read participants (needed for public claiming and admin dashboard)
+        allow read: if true;
+        
+        // Allow authenticated event creator to create participants
+        allow create: if request.auth != null;
+        
+        // Anyone can update participants (needed for claiming without login)
+        allow update: if true;
+      }
+      
+      // Exclusions subcollection
+      match /exclusions/{exclusionId} {
+        // Anyone can read exclusions
+        allow read: if true;
+        
+        // Allow authenticated users to create exclusions
+        allow create: if request.auth != null;
+      }
+    }
+  }
+}

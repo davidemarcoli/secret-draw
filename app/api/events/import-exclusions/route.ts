@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 
 export async function POST(req: NextRequest) {
     try {
@@ -10,26 +11,26 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Find the source event
-        const { data: sourceEvent, error: eventError } = await supabase
-            .from('events')
-            .select('id')
-            .eq('admin_id', adminId)
-            .single();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('admin_id', '==', adminId),
+            limit(1)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
 
-        if (eventError || !sourceEvent) {
+        if (eventsSnapshot.empty) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        // 2. Get pairings from source event
-        // We need to find who drew whom.
-        const { data: participants, error: partError } = await supabase
-            .from('participants')
-            .select('id, name, draws_participant_id')
-            .eq('event_id', sourceEvent.id);
+        const sourceEventDoc = eventsSnapshot.docs[0];
 
-        if (partError) {
-            return NextResponse.json({ error: 'Failed to fetch participants' }, { status: 500 });
-        }
+        // 2. Get pairings from source event
+        const participantsSnapshot = await getDocs(collection(sourceEventDoc.ref, 'participants'));
+        const participants = participantsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name,
+            draws_participant_id: doc.data().draws_participant_id
+        }));
 
         const idToName = new Map(participants.map(p => [p.id, p.name]));
 

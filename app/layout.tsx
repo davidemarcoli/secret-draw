@@ -77,8 +77,30 @@ export default function RootLayout({
             {children}
           </main>
           <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-            <div className="container mx-auto px-4">
-              &copy; {new Date().getFullYear()} Secret Draw. Built for fun.
+            <div className="container mx-auto px-4 space-y-2">
+              <div>
+                &copy; {new Date().getFullYear()} Secret Draw. Built for fun.
+              </div>
+              <div>
+                Developed by{' '}
+                <a
+                  href="https://stefan-laux.dev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground transition-colors"
+                >
+                  Stefan Laux
+                </a>
+                {' '}and{' '}
+                <a
+                  href="https://davidemarcoli.dev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground transition-colors"
+                >
+                  Davide Marcoli
+                </a>
+              </div>
             </div>
           </footer>
           <Toaster />

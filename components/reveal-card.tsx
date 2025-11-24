@@ -1,24 +1,73 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Confetti } from './confetti';
-import { ArrowLeft, Gift } from 'lucide-react';
+import { ArrowLeft, Gift, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 interface RevealCardProps {
-    drawnName: string;
     publicId: string;
+    participantId: string;
 }
 
-export function RevealCard({ drawnName, publicId }: RevealCardProps) {
-    const [showConfetti, setShowConfetti] = useState(true);
+export function RevealCard({ publicId, participantId }: RevealCardProps) {
+    const router = useRouter();
+    const [drawnName, setDrawnName] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [showConfetti, setShowConfetti] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowConfetti(false), 5000);
-        return () => clearTimeout(timer);
-    }, []);
+        const fetchDraw = async () => {
+            try {
+                const res = await fetch(`/api/events/${publicId}/participants/${participantId}/draw`);
+
+                if (!res.ok) {
+                    throw new Error('Failed to load draw');
+                }
+
+                const data = await res.json();
+
+                if (!data.claimed) {
+                    router.push(`/event/${publicId}`);
+                    return;
+                }
+
+                setDrawnName(data.draws.name);
+                setShowConfetti(true);
+
+                const timer = setTimeout(() => setShowConfetti(false), 5000);
+                return () => clearTimeout(timer);
+            } catch (err) {
+                console.error('Error fetching draw:', err);
+                toast.error('Failed to load your draw');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDraw();
+    }, [publicId, participantId, router]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
+    if (!drawnName) {
+        return (
+            <div className="p-20 text-center">
+                <h1 className="text-2xl font-bold mb-4">Error loading draw</h1>
+                <p className="text-muted-foreground">Please try again later.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-md mx-auto text-center space-y-8 pt-10">
