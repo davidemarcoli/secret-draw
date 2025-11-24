@@ -13,8 +13,8 @@ export default function Home() {
           Secret Draw
         </h1>
         <p className="text-xl text-muted-foreground">
-          The easiest way to organize your Secret Santa gift exchange.
-          No accounts, no emails, just a link.
+          The easiest way to organize your Secret Santa or Wichteln gift exchange.
+          Free online generator - no registration, no emails, just share a link.
         </p>
       </div>
 
