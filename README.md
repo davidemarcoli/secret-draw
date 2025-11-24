@@ -105,5 +105,3 @@ If you find a bug or have a feature request, please [open an issue](https://gith
 Give a ⭐️ if this project helped you organize your Secret Santa!
 
 ---
-
-**Made with [Vibecode](https://vibecode.app) by [Davide Marcoli](https://davidemarcoli.dev) and [Stefan Laux](https://stefan-laux.dev)**
