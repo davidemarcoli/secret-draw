@@ -14,10 +14,11 @@ interface AdminDashboardProps {
     adminId: string;
 }
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export function AdminDashboard({ adminId }: AdminDashboardProps) {
     const t = useTranslations('AdminDashboard');
+    const locale = useLocale();
     const [data, setData] = useState<any>(null);
     const [pairings, setPairings] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
@@ -83,10 +84,10 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="p-3 bg-secondary/50 rounded-md break-all text-sm font-mono">
-                            {data.public_id ? `${window.location.origin}/event/${data.public_id}` : t('share.loading')}
+                            {data.public_id ? `${window.location.origin}/${locale}/event/${data.public_id}` : t('share.loading')}
                         </div>
                         <CopyButton
-                            text={data.public_id ? `${window.location.origin}/event/${data.public_id}` : ''}
+                            text={data.public_id ? `${window.location.origin}/${locale}/event/${data.public_id}` : ''}
                             className="w-full"
                         />
                     </CardContent>
