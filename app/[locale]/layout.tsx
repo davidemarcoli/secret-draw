@@ -170,6 +170,11 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        {process.env.NODE_ENV === "production" && (
+          <script defer src="https://umami.homelab.davidemarcoli.dev/script.js" data-website-id="a8da470f-e4c9-4727-9841-940d719bdbf0"></script>
+        )}
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
