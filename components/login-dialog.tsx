@@ -23,7 +23,10 @@ interface LoginDialogProps {
     onSuccess: () => void;
 }
 
+import { useTranslations } from 'next-intl';
+
 export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps) {
+    const t = useTranslations('LoginDialog');
     const [isLoading, setIsLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const [email, setEmail] = useState('');
@@ -38,7 +41,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
             } else {
                 await signInWithEmailAndPassword(auth, email, password);
             }
-            toast.success(isSignUp ? 'Account created!' : 'Welcome back!');
+            toast.success(isSignUp ? t('signup.success') : t('login.success'));
             onSuccess();
             onOpenChange(false);
         } catch (error: any) {
@@ -53,7 +56,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
         try {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
-            toast.success('Welcome back!');
+            toast.success(t('login.success'));
             onSuccess();
             onOpenChange(false);
         } catch (error: any) {
@@ -67,17 +70,17 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{isSignUp ? 'Create Account' : 'Login'}</DialogTitle>
+                    <DialogTitle>{isSignUp ? t('signup.title') : t('login.title')}</DialogTitle>
                     <DialogDescription>
                         {isSignUp
-                            ? 'Create an account to manage your Secret Santa events.'
-                            : 'Login to access your events.'}
+                            ? t('signup.description')
+                            : t('login.description')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <Button variant="outline" onClick={handleGoogleAuth} disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Continue with Google
+                        {t('google')}
                     </Button>
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
@@ -85,13 +88,13 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-background px-2 text-muted-foreground">
-                                Or continue with email
+                                {t('orEmail')}
                             </span>
                         </div>
                     </div>
                     <form onSubmit={handleEmailAuth} className="grid gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">{t('emailLabel')}</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -102,7 +105,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">{t('passwordLabel')}</Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -113,7 +116,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
                         </div>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSignUp ? 'Create Account' : 'Login'}
+                            {isSignUp ? t('signup.submit') : t('login.submit')}
                         </Button>
                     </form>
                     <div className="text-center text-sm">
@@ -122,7 +125,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
                             className="underline"
                             onClick={() => setIsSignUp(!isSignUp)}
                         >
-                            {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign up"}
+                            {isSignUp ? t('signup.switch') : t('login.switch')}
                         </button>
                     </div>
                 </div>

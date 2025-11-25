@@ -14,7 +14,10 @@ interface AdminDashboardProps {
     adminId: string;
 }
 
+import { useTranslations } from 'next-intl';
+
 export function AdminDashboard({ adminId }: AdminDashboardProps) {
+    const t = useTranslations('AdminDashboard');
     const [data, setData] = useState<any>(null);
     const [pairings, setPairings] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,7 +32,7 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
             const json = await res.json();
             setData(json);
         } catch (error) {
-            toast.error('Failed to load dashboard');
+            toast.error(t('error'));
         } finally {
             setLoading(false);
         }
@@ -48,7 +51,7 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
         try {
             const res = await fetch(`/api/admin/${adminId}/pairings`);
             const json = await res.json();
-            if (!res.ok) throw new Error(json.error || 'Failed to load pairings');
+            if (!res.ok) throw new Error(json.error || t('pairings.error'));
 
             setPairings(json.pairings);
             setShowPairings(true);
@@ -57,30 +60,30 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
         }
     };
 
-    if (loading) return <div className="text-center py-20">Loading...</div>;
-    if (!data) return <div className="text-center py-20">Event not found</div>;
+    if (loading) return <div className="text-center py-20">{t('loading')}</div>;
+    if (!data) return <div className="text-center py-20">{t('notFound')}</div>;
 
     return (
         <div className="space-y-8 pb-20">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{data.name}</h1>
-                    <p className="text-muted-foreground">Admin Dashboard</p>
+                    <p className="text-muted-foreground">{t('title')}</p>
                 </div>
                 <Button variant="outline" onClick={fetchData}>
-                    <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+                    <RefreshCw className="mr-2 h-4 w-4" /> {t('refresh')}
                 </Button>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Share Event</CardTitle>
-                        <CardDescription>Send this link to all participants.</CardDescription>
+                        <CardTitle>{t('share.title')}</CardTitle>
+                        <CardDescription>{t('share.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="p-3 bg-secondary/50 rounded-md break-all text-sm font-mono">
-                            {data.public_id ? `${window.location.origin}/event/${data.public_id}` : 'Loading link...'}
+                            {data.public_id ? `${window.location.origin}/event/${data.public_id}` : t('share.loading')}
                         </div>
                         <CopyButton
                             text={data.public_id ? `${window.location.origin}/event/${data.public_id}` : ''}
@@ -91,21 +94,21 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Event Status</CardTitle>
-                        <CardDescription>Overview of your event.</CardDescription>
+                        <CardTitle>{t('status.title')}</CardTitle>
+                        <CardDescription>{t('status.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">Participants</span>
+                            <span className="text-muted-foreground">{t('status.participants')}</span>
                             <span className="font-medium">{data.participants.length}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">Claimed</span>
+                            <span className="text-muted-foreground">{t('status.claimed')}</span>
                             <span className="font-medium">{data.participants.filter((p: any) => p.claimed).length}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">Organizer</span>
-                            <span className="font-medium">{data.organizerParticipating ? 'Participating' : 'Non-participating'}</span>
+                            <span className="text-muted-foreground">{t('status.organizer')}</span>
+                            <span className="font-medium">{data.organizerParticipating ? t('status.participating') : t('status.nonParticipating')}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -113,8 +116,8 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Participants</CardTitle>
-                    <CardDescription>Manage participants and view claim status.</CardDescription>
+                    <CardTitle>{t('participants.title')}</CardTitle>
+                    <CardDescription>{t('participants.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ParticipantStatusTable
@@ -128,15 +131,15 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
             {data.canViewPairings && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Pairings</CardTitle>
+                        <CardTitle>{t('pairings.title')}</CardTitle>
                         <CardDescription>
-                            Since you are not participating, you can view the pairings.
+                            {t('pairings.description')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {!showPairings ? (
                             <Button onClick={fetchPairings} variant="secondary">
-                                <Eye className="mr-2 h-4 w-4" /> Reveal Pairings
+                                <Eye className="mr-2 h-4 w-4" /> {t('pairings.reveal')}
                             </Button>
                         ) : (
                             <div className="space-y-4">
@@ -150,7 +153,7 @@ export function AdminDashboard({ adminId }: AdminDashboardProps) {
                                     ))}
                                 </div>
                                 <Button onClick={() => setShowPairings(false)} variant="ghost" size="sm">
-                                    <EyeOff className="mr-2 h-4 w-4" /> Hide Pairings
+                                    <EyeOff className="mr-2 h-4 w-4" /> {t('pairings.hide')}
                                 </Button>
                             </div>
                         )}

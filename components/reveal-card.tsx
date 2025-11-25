@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Confetti } from './confetti';
@@ -52,6 +52,10 @@ export function RevealCard({ publicId, participantId }: RevealCardProps) {
         fetchDraw();
     }, [publicId, participantId, router]);
 
+    const backToEvent = () => {
+        router.push(`/event/${publicId}`);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -91,11 +95,9 @@ export function RevealCard({ publicId, participantId }: RevealCardProps) {
             </Card>
 
             <div className="pt-8">
-                <Button asChild variant="outline" size="lg">
-                    <Link href={`/event/${publicId}`}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Event
-                    </Link>
+                <Button variant="outline" size="lg" onClick={backToEvent}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Event
                 </Button>
             </div>
         </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,6 +28,7 @@ interface LocalExclusion {
 
 
 export function CreateEventForm() {
+    const t = useTranslations('CreateEventForm');
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -68,7 +70,7 @@ export function CreateEventForm() {
 
             const pairingResult = generatePairings(tempParticipants, tempExclusions as any);
             if (!pairingResult) {
-                throw new Error('No valid pairing possible with these exclusions');
+                throw new Error(t('errors.pairingFailed'));
             }
 
             // Prepare Batch
@@ -160,7 +162,7 @@ export function CreateEventForm() {
 
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || 'Failed to create event');
+            toast.error(error.message || t('errors.createFailed'));
         } finally {
             setLoading(false);
         }
@@ -170,15 +172,15 @@ export function CreateEventForm() {
         e.preventDefault();
 
         if (!name) {
-            toast.error('Event name is required');
+            toast.error(t('errors.nameRequired'));
             return;
         }
         if (participants.length < 3) {
-            toast.error('At least 3 participants are required');
+            toast.error(t('errors.minParticipants'));
             return;
         }
         if (organizerParticipating && !organizerName) {
-            toast.error('Please select your name');
+            toast.error(t('errors.organizerNameRequired'));
             return;
         }
 
@@ -194,42 +196,42 @@ export function CreateEventForm() {
         <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl mx-auto pb-20">
             <Card>
                 <CardHeader>
-                    <CardTitle>Event Details</CardTitle>
-                    <CardDescription>Basic information about your gift exchange.</CardDescription>
+                    <CardTitle>{t('eventDetails.title')}</CardTitle>
+                    <CardDescription>{t('eventDetails.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Event Name *</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Christmas 2024" />
+                        <Label htmlFor="name">{t('eventDetails.nameLabel')}</Label>
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('eventDetails.namePlaceholder', { year: new Date().getFullYear() })} />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Add a nice message..." />
+                        <Label htmlFor="description">{t('eventDetails.descriptionLabel')}</Label>
+                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('eventDetails.descriptionPlaceholder')} />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="date">Date</Label>
+                            <Label htmlFor="date">{t('eventDetails.dateLabel')}</Label>
                             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="budget">Budget</Label>
-                            <Input id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="e.g. CHF 20-30" />
+                            <Label htmlFor="budget">{t('eventDetails.budgetLabel')}</Label>
+                            <Input id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder={t('eventDetails.budgetPlaceholder')} />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="place">Location</Label>
-                        <Input id="place" value={place} onChange={(e) => setPlace(e.target.value)} placeholder="Grandma's House" />
+                        <Label htmlFor="place">{t('eventDetails.locationLabel')}</Label>
+                        <Input id="place" value={place} onChange={(e) => setPlace(e.target.value)} placeholder={t('eventDetails.locationPlaceholder')} />
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Participants</CardTitle>
-                    <CardDescription>Add everyone who is joining. Minimum 3 people.</CardDescription>
+                    <CardTitle>{t('participants.title')}</CardTitle>
+                    <CardDescription>{t('participants.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ParticipantListManager
@@ -241,8 +243,8 @@ export function CreateEventForm() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Organizer</CardTitle>
-                    <CardDescription>Are you participating in the exchange?</CardDescription>
+                    <CardTitle>{t('organizer.title')}</CardTitle>
+                    <CardDescription>{t('organizer.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center space-x-2">
@@ -251,15 +253,15 @@ export function CreateEventForm() {
                             checked={organizerParticipating}
                             onCheckedChange={setOrganizerParticipating}
                         />
-                        <Label htmlFor="organizer-participating">I am participating</Label>
+                        <Label htmlFor="organizer-participating">{t('organizer.participatingLabel')}</Label>
                     </div>
 
                     {organizerParticipating && (
                         <div className="space-y-2">
-                            <Label>Who are you?</Label>
+                            <Label>{t('organizer.whoAreYouLabel')}</Label>
                             <Select value={organizerName} onValueChange={setOrganizerName}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select your name" />
+                                    <SelectValue placeholder={t('organizer.selectNamePlaceholder')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {participants.map(p => (
@@ -268,7 +270,7 @@ export function CreateEventForm() {
                                 </SelectContent>
                             </Select>
                             {participants.length === 0 && (
-                                <p className="text-xs text-muted-foreground">Add participants above first.</p>
+                                <p className="text-xs text-muted-foreground">{t('participants.addParticipantsAbove')}</p>
                             )}
                         </div>
                     )}
@@ -277,8 +279,8 @@ export function CreateEventForm() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Exclusions (Optional)</CardTitle>
-                    <CardDescription>Prevent specific pairs (e.g. couples) from drawing each other.</CardDescription>
+                    <CardTitle>{t('exclusions.title')}</CardTitle>
+                    <CardDescription>{t('exclusions.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ExclusionManager
@@ -292,7 +294,7 @@ export function CreateEventForm() {
             <div className="flex justify-end">
                 <Button size="lg" type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {user ? 'Create Event' : 'Login & Create Event'}
+                    {user ? t('submit.create') : t('submit.loginAndCreate')}
                 </Button>
             </div>
 

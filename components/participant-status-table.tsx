@@ -21,7 +21,10 @@ interface ParticipantStatusTableProps {
     onUpdate: () => void;
 }
 
+import { useTranslations } from 'next-intl';
+
 export function ParticipantStatusTable({ participants, adminId, onUpdate }: ParticipantStatusTableProps) {
+    const t = useTranslations('ParticipantStatusTable');
     const [loadingId, setLoadingId] = useState<string | null>(null);
 
     const toggleActive = async (id: string, currentStatus: boolean) => {
@@ -36,9 +39,9 @@ export function ParticipantStatusTable({ participants, adminId, onUpdate }: Part
             if (!res.ok) throw new Error('Failed to update status');
 
             onUpdate();
-            toast.success('Participant updated');
+            toast.success(t('success'));
         } catch (error) {
-            toast.error('Failed to update participant');
+            toast.error(t('error'));
         } finally {
             setLoadingId(null);
         }
@@ -49,10 +52,10 @@ export function ParticipantStatusTable({ participants, adminId, onUpdate }: Part
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Claimed At</TableHead>
-                        <TableHead className="text-right">Active</TableHead>
+                        <TableHead>{t('headers.name')}</TableHead>
+                        <TableHead>{t('headers.status')}</TableHead>
+                        <TableHead>{t('headers.claimedAt')}</TableHead>
+                        <TableHead className="text-right">{t('headers.active')}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -61,9 +64,9 @@ export function ParticipantStatusTable({ participants, adminId, onUpdate }: Part
                             <TableCell className="font-medium">{p.name}</TableCell>
                             <TableCell>
                                 {p.claimed ? (
-                                    <Badge variant="default" className="bg-green-600 hover:bg-green-700">Claimed</Badge>
+                                    <Badge variant="default" className="bg-green-600 hover:bg-green-700">{t('status.claimed')}</Badge>
                                 ) : (
-                                    <Badge variant="secondary">Pending</Badge>
+                                    <Badge variant="secondary">{t('status.pending')}</Badge>
                                 )}
                             </TableCell>
                             <TableCell className="text-muted-foreground text-sm">

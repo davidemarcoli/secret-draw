@@ -1,0 +1,223 @@
+{
+    "Index": {
+        "title": "Secret Draw",
+        "description": "The easiest way to organize your Secret Santa or Wichteln gift exchange.\nFree online generator - no registration, no emails, just share a link.",
+        "createEvent": "Create Event",
+        "viewEvents": "View Existing Events",
+        "steps": {
+            "1": {
+                "title": "1. Create Event",
+                "description": "Set up your event details and add participants."
+            },
+            "2": {
+                "title": "2. Share Link",
+                "description": "Send the unique link to your group chat."
+            },
+            "3": {
+                "title": "3. Reveal",
+                "description": "Everyone picks their name to see who they got!"
+            }
+        }
+    },
+    "Layout": {
+        "title": "Secret Draw | Free Secret Santa Generator & Wichteln Organizer",
+        "description": "Free online Secret Santa generator and Wichteln organizer. Create your gift exchange in seconds - no registration, no emails required. Perfect for Christmas, office parties, and family gatherings.",
+        "footer": {
+            "builtForFun": "Built for fun.",
+            "developedBy": "Developed by",
+            "and": "and"
+        }
+    },
+    "LanguageSwitcher": {
+        "label": "Language"
+    },
+    "CreateEventForm": {
+        "eventDetails": {
+            "title": "Event Details",
+            "description": "Basic information about your gift exchange.",
+            "nameLabel": "Event Name *",
+            "namePlaceholder": "Christmas {year}",
+            "descriptionLabel": "Description",
+            "descriptionPlaceholder": "Add a nice message...",
+            "dateLabel": "Date",
+            "budgetLabel": "Budget",
+            "budgetPlaceholder": "e.g. CHF 20-30",
+            "locationLabel": "Location",
+            "locationPlaceholder": "Grandma's House"
+        },
+        "participants": {
+            "title": "Participants",
+            "description": "Add everyone who is joining. Minimum 3 people.",
+            "addParticipantsAbove": "Add participants above first."
+        },
+        "organizer": {
+            "title": "Organizer",
+            "description": "Are you participating in the exchange?",
+            "participatingLabel": "I am participating",
+            "whoAreYouLabel": "Who are you?",
+            "selectNamePlaceholder": "Select your name"
+        },
+        "exclusions": {
+            "title": "Exclusions (Optional)",
+            "description": "Prevent specific pairs (e.g. couples) from drawing each other."
+        },
+        "submit": {
+            "create": "Create Event",
+            "loginAndCreate": "Login & Create Event",
+            "loading": "Creating..."
+        },
+        "errors": {
+            "nameRequired": "Event name is required",
+            "minParticipants": "At least 3 participants are required",
+            "organizerNameRequired": "Please select your name",
+            "pairingFailed": "No valid pairing possible with these exclusions",
+            "createFailed": "Failed to create event"
+        }
+    },
+    "ParticipantListManager": {
+        "placeholder": "Enter name (e.g. Alice)",
+        "noParticipants": "No participants added yet."
+    },
+    "ExclusionManager": {
+        "addNew": "Add New Exclusion",
+        "who": "Who...",
+        "selectPerson": "Select person",
+        "cannotDraw": "cannot draw",
+        "whom": "Whom...",
+        "noExclusions": "No exclusions added.",
+        "import": {
+            "title": "Import from Past Event",
+            "placeholder": "Paste Admin Link ID (UUID)",
+            "button": "Import",
+            "importing": "Importing...",
+            "description": "Enter the Admin ID from a previous event to import pairings as exclusions.",
+            "success": "Imported {count} valid exclusions",
+            "failed": "Import failed"
+        }
+    },
+    "LoginDialog": {
+        "login": {
+            "title": "Login",
+            "description": "Login to access your events.",
+            "submit": "Login",
+            "switch": "Don't have an account? Sign up",
+            "success": "Welcome back!"
+        },
+        "signup": {
+            "title": "Create Account",
+            "description": "Create an account to manage your Secret Santa events.",
+            "submit": "Create Account",
+            "switch": "Already have an account? Login",
+            "success": "Account created!"
+        },
+        "google": "Continue with Google",
+        "orEmail": "Or continue with email",
+        "emailLabel": "Email",
+        "passwordLabel": "Password"
+    },
+    "EventView": {
+        "notFound": {
+            "title": "Event not found",
+            "description": "This event may have been deleted or the link is incorrect.",
+            "error": "Failed to load event"
+        },
+        "budget": "Budget",
+        "whoAreYou": "Who are you?",
+        "claimed": "Claimed"
+    },
+    "RevealCard": {
+        "error": {
+            "title": "Error loading draw",
+            "description": "Please try again later.",
+            "loadFailed": "Failed to load draw"
+        },
+        "title": "You are the Secret Santa for...",
+        "buyingFor": "You are buying a gift for",
+        "backToEvent": "Back to Event"
+    },
+    "ClaimConfirmModal": {
+        "title": "Are you {name}?",
+        "description": {
+            "claimed": "You have already claimed this spot. View your draw again?",
+            "unclaimed": "Once you claim this name, it cannot be undone. Please ensure you are selecting your own name."
+        },
+        "cancel": "Cancel",
+        "viewDraw": "View Draw",
+        "confirm": "Yes, that's me",
+        "error": "Failed to claim"
+    },
+    "AdminDashboard": {
+        "title": "Admin Dashboard",
+        "refresh": "Refresh",
+        "loading": "Loading...",
+        "notFound": "Event not found",
+        "share": {
+            "title": "Share Event",
+            "description": "Send this link to all participants.",
+            "loading": "Loading link..."
+        },
+        "status": {
+            "title": "Event Status",
+            "description": "Overview of your event.",
+            "participants": "Participants",
+            "claimed": "Claimed",
+            "organizer": "Organizer",
+            "participating": "Participating",
+            "nonParticipating": "Non-participating"
+        },
+        "participants": {
+            "title": "Participants",
+            "description": "Manage participants and view claim status."
+        },
+        "pairings": {
+            "title": "Pairings",
+            "description": "Since you are not participating, you can view the pairings.",
+            "reveal": "Reveal Pairings",
+            "hide": "Hide Pairings",
+            "error": "Failed to load pairings"
+        },
+        "error": "Failed to load dashboard"
+    },
+    "ParticipantStatusTable": {
+        "headers": {
+            "name": "Name",
+            "status": "Status",
+            "claimedAt": "Claimed At",
+            "active": "Active"
+        },
+        "status": {
+            "claimed": "Claimed",
+            "pending": "Pending"
+        },
+        "success": "Participant updated",
+        "error": "Failed to update participant"
+    },
+    "CopyButton": {
+        "copy": "Copy Link",
+        "copied": "Copied",
+        "success": "Copied to clipboard!",
+        "error": "Failed to copy"
+    },
+    "MyEventsPage": {
+        "title": "My Events",
+        "description": "Manage your Secret Santa events",
+        "create": "Create New Event",
+        "loginRequired": {
+            "title": "Login Required",
+            "description": "Please login to view your events",
+            "button": "Login"
+        },
+        "empty": {
+            "description": "You haven't created any events yet",
+            "button": "Create Your First Event"
+        },
+        "card": {
+            "noDescription": "No description",
+            "openDashboard": "Open Dashboard",
+            "participants": "{count} participants",
+            "claimed": "Claimed: {claimed}/{total}",
+            "budget": "Budget: {budget}"
+        },
+        "error": "Failed to load events"
+    }
+}

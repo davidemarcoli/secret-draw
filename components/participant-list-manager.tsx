@@ -11,7 +11,10 @@ interface ParticipantListManagerProps {
     error?: string;
 }
 
+import { useTranslations } from 'next-intl';
+
 export function ParticipantListManager({ participants, onChange, error }: ParticipantListManagerProps) {
+    const t = useTranslations('ParticipantListManager');
     const [newName, setNewName] = useState('');
 
     const addParticipant = () => {
@@ -42,7 +45,7 @@ export function ParticipantListManager({ participants, onChange, error }: Partic
         <div className="space-y-4">
             <div className="flex gap-2">
                 <Input
-                    placeholder="Enter name (e.g. Alice)"
+                    placeholder={t('placeholder')}
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -71,7 +74,7 @@ export function ParticipantListManager({ participants, onChange, error }: Partic
                 ))}
                 {participants.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                        No participants added yet.
+                        {t('noParticipants')}
                     </p>
                 )}
             </div>

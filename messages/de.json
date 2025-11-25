@@ -1,0 +1,223 @@
+{
+    "Index": {
+        "title": "Wichteln",
+        "description": "Der einfachste Weg, dein Wichtel-Event zu organisieren.\nKostenloser Online-Generator - keine Registrierung, keine E-Mails, einfach Link teilen.",
+        "createEvent": "Event erstellen",
+        "viewEvents": "Bestehende Events ansehen",
+        "steps": {
+            "1": {
+                "title": "1. Event erstellen",
+                "description": "Richte dein Event ein und füge Teilnehmer hinzu."
+            },
+            "2": {
+                "title": "2. Link teilen",
+                "description": "Sende den einzigartigen Link in deinen Gruppenchat."
+            },
+            "3": {
+                "title": "3. Auslosen",
+                "description": "Jeder zieht seinen Namen, um zu sehen, wen er beschenkt!"
+            }
+        }
+    },
+    "Layout": {
+        "title": "Secret Draw | Kostenloser Wichtel Generator & Secret Santa",
+        "description": "Kostenloser Online Wichtel Generator. Erstelle dein Wichtel-Event in Sekunden - keine Registrierung, keine E-Mails nötig. Perfekt für Weihnachten, Bürofeiern und Familientreffen.",
+        "footer": {
+            "builtForFun": "Zum Spass gebaut.",
+            "developedBy": "Entwickelt von",
+            "and": "und"
+        }
+    },
+    "LanguageSwitcher": {
+        "label": "Sprache"
+    },
+    "CreateEventForm": {
+        "eventDetails": {
+            "title": "Event-Details",
+            "description": "Grundlegende Informationen zu deinem Wichteln.",
+            "nameLabel": "Event-Name *",
+            "namePlaceholder": "Weihnachten {year}",
+            "descriptionLabel": "Beschreibung",
+            "descriptionPlaceholder": "Füge eine nette Nachricht hinzu...",
+            "dateLabel": "Datum",
+            "budgetLabel": "Budget",
+            "budgetPlaceholder": "z.B. CHF 20-30",
+            "locationLabel": "Ort",
+            "locationPlaceholder": "Omas Haus"
+        },
+        "participants": {
+            "title": "Teilnehmer",
+            "description": "Füge alle hinzu, die mitmachen. Mindestens 3 Personen.",
+            "addParticipantsAbove": "Füge zuerst Teilnehmer oben hinzu."
+        },
+        "organizer": {
+            "title": "Organisator",
+            "description": "Nimmst du am Wichteln teil?",
+            "participatingLabel": "Ich nehme teil",
+            "whoAreYouLabel": "Wer bist du?",
+            "selectNamePlaceholder": "Wähle deinen Namen"
+        },
+        "exclusions": {
+            "title": "Ausschlüsse (Optional)",
+            "description": "Verhindere bestimmte Paarungen (z.B. Paare), die sich nicht gegenseitig ziehen sollen."
+        },
+        "submit": {
+            "create": "Event erstellen",
+            "loginAndCreate": "Einloggen & Event erstellen",
+            "loading": "Erstelle..."
+        },
+        "errors": {
+            "nameRequired": "Event Name ist erforderlich",
+            "minParticipants": "Mindestens 3 Teilnehmer sind erforderlich",
+            "organizerNameRequired": "Bitte wähle deinen Namen",
+            "pairingFailed": "Keine gültige Paarung mit diesen Ausschlüssen möglich",
+            "createFailed": "Fehler beim Erstellen des Events"
+        }
+    },
+    "ParticipantListManager": {
+        "placeholder": "Name eingeben (z.B. Alice)",
+        "noParticipants": "Noch keine Teilnehmer hinzugefügt."
+    },
+    "ExclusionManager": {
+        "addNew": "Neuen Ausschluss hinzufügen",
+        "who": "Wer...",
+        "selectPerson": "Person wählen",
+        "cannotDraw": "zieht nicht",
+        "whom": "Wen...",
+        "noExclusions": "Keine Ausschlüsse hinzugefügt.",
+        "import": {
+            "title": "Import von früherem Event",
+            "placeholder": "Admin Link ID (UUID) einfügen",
+            "button": "Importieren",
+            "importing": "Importiere...",
+            "description": "Gib die Admin-ID eines früheren Events ein, um Paarungen als Ausschlüsse zu importieren.",
+            "success": "{count} gültige Ausschlüsse importiert",
+            "failed": "Import fehlgeschlagen"
+        }
+    },
+    "LoginDialog": {
+        "login": {
+            "title": "Login",
+            "description": "Logge dich ein, um deine Events zu verwalten.",
+            "submit": "Login",
+            "switch": "Noch keinen Account? Registrieren",
+            "success": "Willkommen zurück!"
+        },
+        "signup": {
+            "title": "Account erstellen",
+            "description": "Erstelle einen Account, um deine Wichtel-Events zu verwalten.",
+            "submit": "Account erstellen",
+            "switch": "Bereits einen Account? Login",
+            "success": "Account erstellt!"
+        },
+        "google": "Weiter mit Google",
+        "orEmail": "Oder weiter mit Email",
+        "emailLabel": "Email",
+        "passwordLabel": "Passwort"
+    },
+    "EventView": {
+        "notFound": {
+            "title": "Event nicht gefunden",
+            "description": "Dieses Event wurde möglicherweise gelöscht oder der Link ist falsch.",
+            "error": "Event konnte nicht geladen werden"
+        },
+        "budget": "Budget",
+        "whoAreYou": "Wer bist du?",
+        "claimed": "Gezogen"
+    },
+    "RevealCard": {
+        "error": {
+            "title": "Fehler beim Laden",
+            "description": "Bitte versuche es später erneut.",
+            "loadFailed": "Ziehung konnte nicht geladen werden"
+        },
+        "title": "Du bist der Wichtel für...",
+        "buyingFor": "Du beschenkst",
+        "backToEvent": "Zurück zum Event"
+    },
+    "ClaimConfirmModal": {
+        "title": "Bist du {name}?",
+        "description": {
+            "claimed": "Du hast diesen Namen bereits gezogen. Möchtest du dein Los erneut sehen?",
+            "unclaimed": "Sobald du diesen Namen wählst, kann dies nicht rückgängig gemacht werden. Bitte stelle sicher, dass du deinen eigenen Namen wählst."
+        },
+        "cancel": "Abbrechen",
+        "viewDraw": "Los ansehen",
+        "confirm": "Ja, das bin ich",
+        "error": "Fehler beim Bestätigen"
+    },
+    "AdminDashboard": {
+        "title": "Admin Dashboard",
+        "refresh": "Aktualisieren",
+        "loading": "Laden...",
+        "notFound": "Event nicht gefunden",
+        "share": {
+            "title": "Event teilen",
+            "description": "Sende diesen Link an alle Teilnehmer.",
+            "loading": "Lade Link..."
+        },
+        "status": {
+            "title": "Event Status",
+            "description": "Übersicht über dein Event.",
+            "participants": "Teilnehmer",
+            "claimed": "Gezogen",
+            "organizer": "Organisator",
+            "participating": "Nimmt teil",
+            "nonParticipating": "Nimmt nicht teil"
+        },
+        "participants": {
+            "title": "Teilnehmer",
+            "description": "Verwalte Teilnehmer und sieh den Status."
+        },
+        "pairings": {
+            "title": "Paarungen",
+            "description": "Da du nicht teilnimmst, kannst du die Paarungen sehen.",
+            "reveal": "Paarungen aufdecken",
+            "hide": "Paarungen verbergen",
+            "error": "Paarungen konnten nicht geladen werden"
+        },
+        "error": "Dashboard konnte nicht geladen werden"
+    },
+    "ParticipantStatusTable": {
+        "headers": {
+            "name": "Name",
+            "status": "Status",
+            "claimedAt": "Gezogen am",
+            "active": "Aktiv"
+        },
+        "status": {
+            "claimed": "Gezogen",
+            "pending": "Ausstehend"
+        },
+        "success": "Teilnehmer aktualisiert",
+        "error": "Fehler beim Aktualisieren des Teilnehmers"
+    },
+    "CopyButton": {
+        "copy": "Link kopieren",
+        "copied": "Kopiert",
+        "success": "In die Zwischenablage kopiert!",
+        "error": "Kopieren fehlgeschlagen"
+    },
+    "MyEventsPage": {
+        "title": "Meine Events",
+        "description": "Verwalte deine Wichtel-Events",
+        "create": "Neues Event erstellen",
+        "loginRequired": {
+            "title": "Login erforderlich",
+            "description": "Bitte logge dich ein, um deine Events zu sehen",
+            "button": "Login"
+        },
+        "empty": {
+            "description": "Du hast noch keine Events erstellt",
+            "button": "Erstelle dein erstes Event"
+        },
+        "card": {
+            "noDescription": "Keine Beschreibung",
+            "openDashboard": "Dashboard öffnen",
+            "participants": "{count} Teilnehmer",
+            "claimed": "Gezogen: {claimed}/{total}",
+            "budget": "Budget: {budget}"
+        },
+        "error": "Events konnten nicht geladen werden"
+    }
+}

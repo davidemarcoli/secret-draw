@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ClaimConfirmModal } from './claim-confirm-modal';
 import { Calendar, MapPin, Wallet, Gift, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface Participant {
     id: string;
@@ -28,6 +29,7 @@ interface EventViewProps {
 }
 
 export function EventView({ publicId }: EventViewProps) {
+    const t = useTranslations('EventView');
     const [event, setEvent] = useState<EventData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -46,14 +48,14 @@ export function EventView({ publicId }: EventViewProps) {
             } catch (err) {
                 console.error('Error fetching event:', err);
                 setError(true);
-                toast.error('Failed to load event');
+                toast.error(t('notFound.error'));
             } finally {
                 setLoading(false);
             }
         };
 
         fetchEvent();
-    }, [publicId]);
+    }, [publicId, t]);
 
     const handleParticipantClick = (participant: Participant) => {
         setSelectedParticipant(participant);
@@ -71,8 +73,8 @@ export function EventView({ publicId }: EventViewProps) {
     if (error || !event) {
         return (
             <div className="p-20 text-center">
-                <h1 className="text-2xl font-bold mb-4">Event not found</h1>
-                <p className="text-muted-foreground">This event may have been deleted or the link is incorrect.</p>
+                <h1 className="text-2xl font-bold mb-4">{t('notFound.title')}</h1>
+                <p className="text-muted-foreground">{t('notFound.description')}</p>
             </div>
         );
     }
@@ -101,14 +103,14 @@ export function EventView({ publicId }: EventViewProps) {
                     {event.budget && (
                         <div className="flex items-center gap-3 text-sm">
                             <Wallet className="h-4 w-4 text-muted-foreground" />
-                            <span>Budget: {event.budget}</span>
+                            <span>{t('budget')}: {event.budget}</span>
                         </div>
                     )}
                 </CardContent>
             </Card>
 
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-center">Who are you?</h2>
+                <h2 className="text-xl font-semibold text-center">{t('whoAreYou')}</h2>
                 <div className="grid gap-3">
                     {event.participants.map((p) => (
                         <Button
@@ -119,7 +121,7 @@ export function EventView({ publicId }: EventViewProps) {
                         >
                             <span className={p.claimed ? 'line-through text-muted-foreground' : ''}>{p.name}</span>
                             {p.claimed ? (
-                                <Badge variant="secondary" className="ml-2">Claimed</Badge>
+                                <Badge variant="secondary" className="ml-2">{t('claimed')}</Badge>
                             ) : (
                                 <Gift className="h-5 w-5 text-primary" />
                             )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
@@ -11,7 +11,10 @@ import { LoginDialog } from './login-dialog';
 import { Loader2, Calendar, Users, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useTranslations } from 'next-intl';
+
 export function MyEventsPage() {
+    const t = useTranslations('MyEventsPage');
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [showLogin, setShowLogin] = useState(false);
@@ -63,7 +66,7 @@ export function MyEventsPage() {
             setEvents(eventsData);
         } catch (error) {
             console.error('Error fetching events:', error);
-            toast.error('Failed to load events');
+            toast.error(t('error'));
         } finally {
             setLoading(false);
         }
@@ -80,12 +83,12 @@ export function MyEventsPage() {
     if (!user) {
         return (
             <div className="max-w-2xl mx-auto text-center py-20">
-                <h2 className="text-2xl font-bold mb-4">Login Required</h2>
+                <h2 className="text-2xl font-bold mb-4">{t('loginRequired.title')}</h2>
                 <p className="text-muted-foreground mb-6">
-                    Please login to view your events
+                    {t('loginRequired.description')}
                 </p>
                 <Button onClick={() => setShowLogin(true)}>
-                    Login
+                    {t('loginRequired.button')}
                 </Button>
                 <LoginDialog
                     open={showLogin}
@@ -104,11 +107,11 @@ export function MyEventsPage() {
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">My Events</h1>
-                    <p className="text-muted-foreground">Manage your Secret Santa events</p>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('description')}</p>
                 </div>
                 <Button onClick={() => router.push('/create')}>
-                    Create New Event
+                    {t('create')}
                 </Button>
             </div>
 
@@ -116,10 +119,10 @@ export function MyEventsPage() {
                 <Card>
                     <CardContent className="py-20 text-center">
                         <p className="text-muted-foreground mb-4">
-                            You haven't created any events yet
+                            {t('empty.description')}
                         </p>
                         <Button onClick={() => router.push('/create')}>
-                            Create Your First Event
+                            {t('empty.button')}
                         </Button>
                     </CardContent>
                 </Card>
@@ -132,7 +135,7 @@ export function MyEventsPage() {
                                     <div>
                                         <CardTitle>{event.name}</CardTitle>
                                         <CardDescription>
-                                            {event.description || 'No description'}
+                                            {event.description || t('card.noDescription')}
                                         </CardDescription>
                                     </div>
                                     <Button
@@ -141,7 +144,7 @@ export function MyEventsPage() {
                                         onClick={() => router.push(`/admin/${event.admin_id}`)}
                                     >
                                         <ExternalLink className="h-4 w-4 mr-2" />
-                                        Open Dashboard
+                                        {t('card.openDashboard')}
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -155,14 +158,14 @@ export function MyEventsPage() {
                                     )}
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4 text-muted-foreground" />
-                                        <span>{event.participantCount} participants</span>
+                                        <span>{t('card.participants', { count: event.participantCount })}</span>
                                     </div>
                                     <div className="text-muted-foreground">
-                                        Claimed: {event.claimedCount}/{event.participantCount}
+                                        {t('card.claimed', { claimed: event.claimedCount, total: event.participantCount })}
                                     </div>
                                     {event.budget && (
                                         <div className="text-muted-foreground">
-                                            Budget: {event.budget}
+                                            {t('card.budget', { budget: event.budget })}
                                         </div>
                                     )}
                                 </div>

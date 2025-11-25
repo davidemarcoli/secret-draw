@@ -11,17 +11,20 @@ interface CopyButtonProps {
     className?: string;
 }
 
-export function CopyButton({ text, label = 'Copy Link', className }: CopyButtonProps) {
+import { useTranslations } from 'next-intl';
+
+export function CopyButton({ text, label, className }: CopyButtonProps) {
+    const t = useTranslations('CopyButton');
     const [copied, setCopied] = useState(false);
 
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(text);
             setCopied(true);
-            toast.success('Copied to clipboard!');
+            toast.success(t('success'));
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
-            toast.error('Failed to copy');
+            toast.error(t('error'));
         }
     };
 
@@ -33,7 +36,7 @@ export function CopyButton({ text, label = 'Copy Link', className }: CopyButtonP
             onClick={handleCopy}
         >
             {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-            {copied ? 'Copied' : label}
+            {copied ? t('copied') : (label || t('copy'))}
         </Button>
     );
 }
